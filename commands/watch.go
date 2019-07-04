@@ -68,6 +68,7 @@ func run() error {
 			fmt.Println("watch error:", err)
 		}
 		done := make(chan bool)
+		var wg sync.WaitGroup
 		//
 		go func() {
 			for {
@@ -77,7 +78,9 @@ func run() error {
 					name, op := event.Name, event.Op
 					name = path.Join("..", name)
 					tpl := fet.GetTemplateFile(name)
-					if op == fsnotify.Remove {
+					if op == fsnotify.Chmod {
+						// ignore
+					} else if op == fsnotify.Remove {
 						ctpl := fet.GetCompileFile(tpl)
 						if fet.IsIgnoreFile(ctpl) {
 							// do nothing
@@ -89,13 +92,18 @@ func run() error {
 						fileDeps.Delete(ctpl)
 					} else {
 						files := []string{}
+						isNeedAddSelf := true
 						if op == fsnotify.Create {
-							files = append(files, tpl)
+							// add self file
 						} else {
+							fmt.Println("changes:", tpl, op)
 							fileDeps.Range(func(key, value interface{}) bool {
 								if curTpl, ok := key.(string); ok {
 									if deps, ok := value.([]string); ok {
 										if contains(deps, tpl) {
+											if curTpl == tpl {
+												isNeedAddSelf = false
+											}
 											files = append(files, curTpl)
 										}
 									}
@@ -103,7 +111,9 @@ func run() error {
 								return true
 							})
 						}
-						var wg sync.WaitGroup
+						if isNeedAddSelf && !fet.IsIgnoreFile(tpl) {
+							files = append(files, tpl)
+						}
 						wg.Add(len(files))
 						for _, curTpl := range files {
 							go func(tpl string) {
@@ -128,7 +138,7 @@ func run() error {
 	} else {
 		err = mErr
 	}
-	return nil
+	return err
 }
 
 // Watch command
@@ -138,8 +148,7 @@ func Watch() cli.Command {
 		Aliases: []string{"w"},
 		Usage:   "watch the file fet template files changes and compile them",
 		Action: func(c *cli.Context) error {
-			run()
-			return nil
+			return run()
 		},
 	}
 }

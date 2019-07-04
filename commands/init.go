@@ -50,8 +50,18 @@ func configForm() {
 		},
 		{
 			Name: "ucaseField",
-			Prompt: &survey.Confirm{
+			Prompt: &survey.Select{
 				Message: "do you need to set the first character of fields(struct/map etc.) to uppercase?",
+				Options: []string{"true", "false"},
+				Default: "false",
+			},
+		},
+		{
+			Name: "glob",
+			Prompt: &survey.Select{
+				Message: "use parseGlob api,if true,will add 'define' tag to wrap the compile code",
+				Options: []string{"true", "false"},
+				Default: "false",
 			},
 		},
 		{
@@ -82,7 +92,8 @@ func configForm() {
 		Mode           string
 		LeftDelimiter  string
 		RightDelimiter string
-		UcaseField     bool
+		UcaseField     string
+		Glob           string
 		TemplateDir    string
 		CompileDir     string
 		Ignores        string
@@ -98,6 +109,8 @@ func configForm() {
 	} else {
 		config.Mode = types.Gofet
 	}
+	config.UcaseField = answers.UcaseField == "true"
+	config.Glob = answers.Glob == "true"
 	config.LeftDelimiter = answers.LeftDelimiter
 	config.RightDelimiter = answers.RightDelimiter
 	config.TemplateDir = answers.TemplateDir
@@ -120,6 +133,7 @@ func configForm() {
 	} else {
 		fmt.Printf("Your 'fet' config file was created successfully!")
 	}
+	fmt.Println("")
 }
 
 // Init command
