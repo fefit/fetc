@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"path"
 	"path/filepath"
 
 	pfet "github.com/fefit/fet"
@@ -75,7 +74,6 @@ func run() error {
 				// watch for events
 				case event := <-watcher.Events:
 					name, op := event.Name, event.Op
-					name = path.Join("..", name)
 					tpl := fet.GetTemplateFile(name)
 					if op == fsnotify.Chmod {
 						// ignore
@@ -95,7 +93,7 @@ func run() error {
 						if op == fsnotify.Create {
 							// add self file
 						} else {
-							fmt.Println("changes:", tpl, op)
+							fmt.Println("changes:", tpl)
 							fileDeps.Range(func(key, value interface{}) bool {
 								if curTpl, ok := key.(string); ok {
 									if deps, ok := value.([]string); ok {
