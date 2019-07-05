@@ -4,7 +4,10 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"path"
 	"path/filepath"
+	"strings"
+	"sync"
 
 	pfet "github.com/fefit/fet"
 	"github.com/fefit/fet/types"
@@ -23,11 +26,16 @@ func checkDorfExists(pathname string) (notexist bool, err error) {
 	return false, nil
 }
 
+// e.g .vscode .a.html.swap
+func isSpecialDorf(dorf string) bool {
+	return strings.HasPrefix(path.Base(dorf), ".")
+}
+
 var watcher *fsnotify.Watcher
 
-func watchDir(path string, fi os.FileInfo, err error) error {
-	if fi.Mode().IsDir() {
-		return watcher.Add(path)
+func watchDir(curPath string, fi os.FileInfo, err error) error {
+	if fi.Mode().IsDir() && !isSpecialDorf(curPath) {
+		return watcher.Add(curPath)
 	}
 	return nil
 }
@@ -66,7 +74,6 @@ func run() error {
 			fmt.Println("watch error:", err)
 		}
 		done := make(chan bool)
-
 		//
 		go func() {
 			for {
@@ -75,6 +82,9 @@ func run() error {
 				case event := <-watcher.Events:
 					name, op := event.Name, event.Op
 					tpl := fet.GetTemplateFile(name)
+					if isSpecialDorf(tpl) {
+						break
+					}
 					if op == fsnotify.Chmod {
 						// ignore
 					} else if op == fsnotify.Remove {
@@ -111,20 +121,21 @@ func run() error {
 						if isNeedAddSelf && !fet.IsIgnoreFile(tpl) {
 							files = append(files, tpl)
 						}
-						//var wg sync.WaitGroup
-						//wg.Add(len(files))
+						var wg sync.WaitGroup
+						wg.Add(len(files))
 						for _, curTpl := range files {
-							func(tpl string) {
+							go func(tpl string, conf *types.FetConfig) {
+								fet, _ = pfet.New(conf)
 								_, deps, err := fet.Compile(tpl, true)
 								if err != nil {
 									fmt.Println("compile failure:", err.Error())
 								} else {
 									fileDeps.Store(tpl, deps)
 								}
-								// wg.Done()
-							}(curTpl)
+								wg.Done()
+							}(curTpl, conf)
 						}
-						// wg.Wait()
+						wg.Wait()
 					}
 					// watch for errors
 				case err := <-watcher.Errors:
