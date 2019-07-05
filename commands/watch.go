@@ -6,7 +6,6 @@ import (
 	"os"
 	"path"
 	"path/filepath"
-	"sync"
 
 	pfet "github.com/fefit/fet"
 	"github.com/fefit/fet/types"
@@ -68,7 +67,7 @@ func run() error {
 			fmt.Println("watch error:", err)
 		}
 		done := make(chan bool)
-		var wg sync.WaitGroup
+
 		//
 		go func() {
 			for {
@@ -114,19 +113,20 @@ func run() error {
 						if isNeedAddSelf && !fet.IsIgnoreFile(tpl) {
 							files = append(files, tpl)
 						}
-						wg.Add(len(files))
+						//var wg sync.WaitGroup
+						//wg.Add(len(files))
 						for _, curTpl := range files {
-							go func(tpl string) {
+							func(tpl string) {
 								_, deps, err := fet.Compile(tpl, true)
 								if err != nil {
 									fmt.Println("compile failure:", err.Error())
 								} else {
 									fileDeps.Store(tpl, deps)
 								}
-								wg.Done()
+								// wg.Done()
 							}(curTpl)
 						}
-						wg.Wait()
+						// wg.Wait()
 					}
 					// watch for errors
 				case err := <-watcher.Errors:
