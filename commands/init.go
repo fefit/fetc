@@ -65,6 +65,14 @@ func configForm() {
 			},
 		},
 		{
+			Name: "autoRoot",
+			Prompt: &survey.Select{
+				Message: "if autoRoot is true, will trait variables that not assigned as root field of data",
+				Options: []string{"true", "false"},
+				Default: "false",
+			},
+		},
+		{
 			Name: "templateDir",
 			Prompt: &survey.Input{
 				Message: "the directory of your fet template files:",
@@ -94,6 +102,7 @@ func configForm() {
 		RightDelimiter string
 		UcaseField     string
 		Glob           string
+		AutoRoot       string
 		TemplateDir    string
 		CompileDir     string
 		Ignores        string
@@ -111,6 +120,7 @@ func configForm() {
 	}
 	config.UcaseField = answers.UcaseField == "true"
 	config.Glob = answers.Glob == "true"
+	config.AutoRoot = answers.AutoRoot == "true"
 	config.LeftDelimiter = answers.LeftDelimiter
 	config.RightDelimiter = answers.RightDelimiter
 	config.TemplateDir = answers.TemplateDir
