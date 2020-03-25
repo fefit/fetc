@@ -12,7 +12,7 @@ import (
 	pfet "github.com/fefit/fet"
 	"github.com/fefit/fet/types"
 	"github.com/fsnotify/fsnotify"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v2"
 )
 
 // check director of file if exists
