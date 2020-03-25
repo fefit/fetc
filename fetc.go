@@ -13,7 +13,7 @@ func main() {
 	app := cli.NewApp()
 	app.Name = "fetc"
 	app.Usage = "fetc is the fet's command line tool"
-	app.Commands = []cli.Command{
+	app.Commands = []*cli.Command{
 		commands.Init(),
 		commands.Watch(),
 	}

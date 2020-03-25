@@ -8,7 +8,7 @@ import (
 
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/fefit/fet/types"
-	"github.com/urfave/cli"
+	"github.com/urfave/cli/v2"
 )
 
 // validate if empty
@@ -147,13 +147,13 @@ func configForm() {
 }
 
 // Init command
-func Init() cli.Command {
-	return cli.Command{
+func Init() *cli.Command {
+	return &cli.Command{
 		Name:    "init",
 		Aliases: []string{"i"},
 		Usage:   "initialize the fet's configs",
 		Action: func(c *cli.Context) error {
-			if len(c.Args()) > 0 {
+			if c.Args().Len() > 0 {
 				fmt.Println("the command 'init' do not receive any argument")
 			} else {
 				configForm()

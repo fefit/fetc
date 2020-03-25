@@ -151,8 +151,8 @@ func run() error {
 }
 
 // Watch command
-func Watch() cli.Command {
-	return cli.Command{
+func Watch() *cli.Command {
+	return &cli.Command{
 		Name:    "watch",
 		Aliases: []string{"w"},
 		Usage:   "watch the file fet template files changes and compile them",
