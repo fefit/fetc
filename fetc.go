@@ -16,6 +16,7 @@ func main() {
 	app.Commands = []*cli.Command{
 		commands.Init(),
 		commands.Watch(),
+		commands.Compile(),
 	}
 	app.Action = func(c *cli.Context) error {
 		fmt.Println("thank you for using fet template engineer, use 'fetc -h' for helps.")

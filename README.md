@@ -13,4 +13,7 @@ fetc init
 
 # watch the file changes and recompile
 fetc watch
+
+# compile the files, if no file given, compile all the template files.
+fetc compile x.html xx.html
 ```

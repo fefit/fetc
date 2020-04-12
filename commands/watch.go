@@ -4,56 +4,22 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"path"
 	"path/filepath"
-	"strings"
 	"sync"
 
 	pfet "github.com/fefit/fet"
 	"github.com/fefit/fet/types"
+	"github.com/fefit/fetc/utils"
 	"github.com/fsnotify/fsnotify"
 	"github.com/urfave/cli/v2"
 )
 
-// check director of file if exists
-func checkDorfExists(pathname string) (notexist bool, err error) {
-	if _, err := os.Stat(pathname); err != nil {
-		if os.IsNotExist(err) {
-			return true, fmt.Errorf("the file or directory '%s' is not exist", pathname)
-		}
-		return false, err
-	}
-	return false, nil
-}
-
-// e.g .vscode .a.html.swap
-func isSpecialDorf(dorf string) bool {
-	return strings.HasPrefix(path.Base(dorf), ".")
-}
-
-var watcher *fsnotify.Watcher
-
-func watchDir(curPath string, fi os.FileInfo, err error) error {
-	if fi.Mode().IsDir() && !isSpecialDorf(curPath) {
-		return watcher.Add(curPath)
-	}
-	return nil
-}
-
-func contains(arr []string, key string) bool {
-	for _, cur := range arr {
-		if cur == key {
-			return true
-		}
-	}
-	return false
-}
-
 // run the command
-func run() error {
+func runWatch() error {
 	var (
-		conf *types.FetConfig
-		err  error
+		conf    *types.FetConfig
+		err     error
+		watcher *fsnotify.Watcher
 	)
 	if conf, err = pfet.LoadConf("fet.config.json"); err != nil {
 		return err
@@ -70,7 +36,13 @@ func run() error {
 			log.Fatal(err)
 		}
 		defer watcher.Close()
-		if err := filepath.Walk(fet.TemplateDir, watchDir); err != nil {
+		err = filepath.Walk(fet.TemplateDir, func(curPath string, fi os.FileInfo, err error) error {
+			if fi.Mode().IsDir() && !utils.IsSpecialDorf(curPath) && !fet.NeedIgnore(curPath) {
+				return watcher.Add(curPath)
+			}
+			return nil
+		})
+		if err != nil {
 			fmt.Println("watch error:", err)
 		}
 		done := make(chan bool)
@@ -81,15 +53,15 @@ func run() error {
 				// watch for events
 				case event := <-watcher.Events:
 					name, op := event.Name, event.Op
-					tpl := fet.GetTemplateFile(name)
-					if isSpecialDorf(tpl) {
+					tpl := fet.RealTmplPath(name)
+					if utils.IsSpecialDorf(tpl) {
 						break
 					}
 					if op == fsnotify.Chmod {
 						// ignore
 					} else if op == fsnotify.Remove {
-						ctpl := fet.GetCompileFile(tpl)
-						if fet.IsIgnoreFile(ctpl) {
+						ctpl := fet.RealCmplPath(tpl)
+						if fet.NeedIgnore(ctpl) {
 							// do nothing
 						} else {
 							// delete the compile file
@@ -107,7 +79,7 @@ func run() error {
 							fileDeps.Range(func(key, value interface{}) bool {
 								if curTpl, ok := key.(string); ok {
 									if deps, ok := value.([]string); ok {
-										if contains(deps, tpl) {
+										if utils.ContainsStr(deps, tpl) {
 											if curTpl == tpl {
 												isNeedAddSelf = false
 											}
@@ -118,7 +90,7 @@ func run() error {
 								return true
 							})
 						}
-						if isNeedAddSelf && !fet.IsIgnoreFile(tpl) {
+						if isNeedAddSelf && !fet.NeedIgnore(tpl) {
 							files = append(files, tpl)
 						}
 						var wg sync.WaitGroup
@@ -157,7 +129,7 @@ func Watch() *cli.Command {
 		Aliases: []string{"w"},
 		Usage:   "watch the file fet template files changes and compile them",
 		Action: func(c *cli.Context) error {
-			return run()
+			return runWatch()
 		},
 	}
 }

@@ -22,7 +22,7 @@ func validIfEmpty(name string) func(val interface{}) error {
 }
 
 // config the fet
-func configForm() {
+func runInit() {
 	qs := []*survey.Question{
 		{
 			Name: "mode",
@@ -73,6 +73,14 @@ func configForm() {
 			},
 		},
 		{
+			Name: "debug",
+			Prompt: &survey.Select{
+				Message: "if debug is true, the fet methods will output some necessary info.",
+				Options: []string{"true", "false"},
+				Default: "false",
+			},
+		},
+		{
 			Name: "templateDir",
 			Prompt: &survey.Input{
 				Message: "the directory of your fet template files:",
@@ -106,6 +114,7 @@ func configForm() {
 		TemplateDir    string
 		CompileDir     string
 		Ignores        string
+		Debug          string
 	}{}
 	err := survey.Ask(qs, &answers)
 	if err != nil {
@@ -121,6 +130,7 @@ func configForm() {
 	config.UcaseField = answers.UcaseField == "true"
 	config.Glob = answers.Glob == "true"
 	config.AutoRoot = answers.AutoRoot == "true"
+	config.Debug = answers.Debug == "true"
 	config.LeftDelimiter = answers.LeftDelimiter
 	config.RightDelimiter = answers.RightDelimiter
 	config.TemplateDir = answers.TemplateDir
@@ -156,7 +166,7 @@ func Init() *cli.Command {
 			if c.Args().Len() > 0 {
 				fmt.Println("the command 'init' do not receive any argument")
 			} else {
-				configForm()
+				runInit()
 			}
 			return nil
 		},
