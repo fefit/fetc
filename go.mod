@@ -6,7 +6,7 @@ require (
 	github.com/cpuguy83/go-md2man/v2 v2.0.0 // indirect
 	github.com/creack/pty v1.1.9 // indirect
 	github.com/fatih/color v1.9.0
-	github.com/fefit/fet v0.1.0
+	github.com/fefit/fet v0.1.1
 	github.com/fsnotify/fsnotify v1.4.9
 	github.com/hinshun/vt10x v0.0.0-20180809195222-d55458df857c // indirect
 	github.com/kr/pty v1.1.8 // indirect
