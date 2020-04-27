@@ -37,7 +37,7 @@ func runWatch() error {
 		}
 		defer watcher.Close()
 		err = filepath.Walk(fet.TemplateDir, func(curPath string, fi os.FileInfo, err error) error {
-			if fi.Mode().IsDir() && !utils.IsSpecialDorf(curPath) && !fet.NeedIgnore(curPath) {
+			if fi.Mode().IsDir() && !utils.IsSpecialDorf(curPath) {
 				return watcher.Add(curPath)
 			}
 			return nil
@@ -83,7 +83,9 @@ func runWatch() error {
 											if curTpl == tpl {
 												isNeedAddSelf = false
 											}
-											files = append(files, curTpl)
+											if !fet.NeedIgnore(curTpl) {
+												files = append(files, curTpl)
+											}
 										}
 									}
 								}
