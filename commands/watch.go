@@ -24,6 +24,9 @@ func runWatch() error {
 	if conf, err = pfet.LoadConf("fet.config.json"); err != nil {
 		return err
 	}
+	// always enable debug
+	conf.Debug = true
+	// fet instance
 	if fet, mErr := pfet.New(conf); mErr == nil {
 		// first, compile all files, get the includes and extends map
 		fileDeps, err := fet.CompileAll()

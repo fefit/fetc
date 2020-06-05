@@ -75,7 +75,7 @@ func runInit() {
 		{
 			Name: "debug",
 			Prompt: &survey.Select{
-				Message: "if debug is true, the fet methods will output some necessary info.",
+				Message: "if debug is true, the fet's methods will output some necessary information.",
 				Options: []string{"true", "false"},
 				Default: "false",
 			},
