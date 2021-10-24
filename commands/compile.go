@@ -20,6 +20,8 @@ func runCompile(c *cli.Context) error {
 	if conf, err = pfet.LoadConf("fet.config.json"); err != nil {
 		return err
 	}
+	// always disable debug
+	conf.Debug = false
 	// compile files
 	if fet, mErr := pfet.New(conf); mErr == nil {
 		// need compile some files

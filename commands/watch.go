@@ -25,6 +25,9 @@ func runWatch() error {
 	if conf, err = pfet.LoadConf("fet.config.json"); err != nil {
 		return err
 	}
+	// always enable debug
+	conf.Debug = true
+	// fet instance
 	if fet, mErr := pfet.New(conf); mErr == nil {
 		// first, compile all files, get the includes and extends map
 		fileDeps, err := fet.CompileAll()
@@ -38,7 +41,7 @@ func runWatch() error {
 		}
 		defer watcher.Close()
 		err = filepath.Walk(fet.TemplateDir, func(curPath string, fi os.FileInfo, err error) error {
-			if fi.Mode().IsDir() && !utils.IsSpecialDorf(curPath) && !fet.NeedIgnore(curPath) {
+			if fi.Mode().IsDir() && !utils.IsSpecialDorf(curPath) {
 				return watcher.Add(curPath)
 			}
 			return nil
@@ -84,7 +87,9 @@ func runWatch() error {
 											if curTpl == tpl {
 												isNeedAddSelf = false
 											}
-											files = append(files, curTpl)
+											if !fet.NeedIgnore(curTpl) {
+												files = append(files, curTpl)
+											}
 										}
 									}
 								}

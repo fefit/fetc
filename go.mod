@@ -26,3 +26,5 @@ require (
 	golang.org/x/sys v0.0.0-20211023085530-d6a326fbbf70 // indirect
 	golang.org/x/text v0.3.2 // indirect
 )
+
+// replace github.com/fefit/fet => ../fet // for local debug
