@@ -1,6 +1,6 @@
 # fetc
 
-fetc is the fet template engineer's command line tool.
+fetc is the command line tool of the golang template engine fet.
 
 ## Usage
 
