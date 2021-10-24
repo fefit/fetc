@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"sync"
 
+	"github.com/fatih/color"
 	pfet "github.com/fefit/fet"
 	"github.com/fefit/fet/types"
 	"github.com/fefit/fetc/utils"
@@ -28,10 +29,10 @@ func runWatch() error {
 		// first, compile all files, get the includes and extends map
 		fileDeps, err := fet.CompileAll()
 		if err != nil {
-			fmt.Println("compile error:", err.Error())
+			fmt.Println(color.RedString(err.Error()))
 		}
 		// create watcher
-		watcher, _ = fsnotify.NewWatcher()
+		watcher, err = fsnotify.NewWatcher()
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -43,7 +44,7 @@ func runWatch() error {
 			return nil
 		})
 		if err != nil {
-			fmt.Println("watch error:", err)
+			fmt.Println(color.RedString("compile error:"), err.Error())
 		}
 		done := make(chan bool)
 		//
@@ -65,7 +66,7 @@ func runWatch() error {
 							// do nothing
 						} else {
 							// delete the compile file
-							fmt.Println("delete compiled file:", ctpl)
+							fmt.Println(color.MagentaString("Delete compiled file:"), ctpl)
 							os.Remove(ctpl)
 						}
 						fileDeps.Delete(ctpl)
@@ -75,7 +76,7 @@ func runWatch() error {
 						if op == fsnotify.Create {
 							// add self file
 						} else {
-							fmt.Println("changes:", tpl)
+							fmt.Println(color.YellowString("Changed:"))
 							fileDeps.Range(func(key, value interface{}) bool {
 								if curTpl, ok := key.(string); ok {
 									if deps, ok := value.([]string); ok {
@@ -100,7 +101,7 @@ func runWatch() error {
 								fet, _ = pfet.New(conf)
 								_, deps, err := fet.Compile(tpl, true)
 								if err != nil {
-									fmt.Println("compile failure:", err.Error())
+									fmt.Println(color.RedString("Compile failure:%s", err.Error()))
 								} else {
 									fileDeps.Store(tpl, deps)
 								}
@@ -111,7 +112,7 @@ func runWatch() error {
 					}
 					// watch for errors
 				case err := <-watcher.Errors:
-					fmt.Println("watch error:", err)
+					fmt.Println(color.RedString("Watch failure:%s", err.Error()))
 				}
 			}
 		}()
@@ -127,7 +128,7 @@ func Watch() *cli.Command {
 	return &cli.Command{
 		Name:    "watch",
 		Aliases: []string{"w"},
-		Usage:   "watch the file fet template files changes and compile them",
+		Usage:   "watch the changes of 'fet' template files, and compile at runtime.",
 		Action: func(c *cli.Context) error {
 			return runWatch()
 		},

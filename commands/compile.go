@@ -62,10 +62,10 @@ func runCompile(c *cli.Context) error {
 			}
 			if err == nil {
 				endTime := time.Now()
-				logLn("All Files Compiled success: %v", endTime.Sub(startTime))
+				logLn("All files compiled success: %v", endTime.Sub(startTime))
 			}
 		} else {
-			logLn("No files need compile")
+			logLn("No file needs compile")
 		}
 	} else {
 		err = mErr
@@ -78,7 +78,7 @@ func Compile() *cli.Command {
 	return &cli.Command{
 		Name:    "compile",
 		Aliases: []string{"c"},
-		Usage:   "compile the files",
+		Usage:   "compile the 'fet' template files into golang 'html/template' files",
 		Action: func(c *cli.Context) error {
 			return runCompile(c)
 		},

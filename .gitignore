@@ -16,6 +16,9 @@ fet.config.json
 /templates
 /views
 
+# binary
+fetc
+
 # system&editor
 .vscode
 .DS_*
