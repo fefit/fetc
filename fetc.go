@@ -33,7 +33,7 @@ func main() {
 		fmt.Println("welcome to use 'fet' template engine, use 'fetc -h' for helps.")
 		return nil
 	}
-	app.Version = "0.1.7"
+	app.Version = "0.1.8"
 	err = app.Run(os.Args)
 	if err != nil {
 		log.Fatal(err)

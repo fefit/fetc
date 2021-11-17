@@ -5,7 +5,7 @@ go 1.17
 require (
 	github.com/AlecAivazis/survey/v2 v2.0.7
 	github.com/fatih/color v1.13.0
-	github.com/fefit/fet v0.1.7
+	github.com/fefit/fet v0.1.8
 	github.com/fsnotify/fsnotify v1.4.9
 	github.com/urfave/cli/v2 v2.2.0
 )
